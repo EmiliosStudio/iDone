@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My-iDoceo Clone</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <nav class="bg-blue-600 p-4 text-white shadow-lg flex justify-between items-center">
+        <h1 class="text-xl font-bold">Classroom Manager Pro</h1>
+        <button onclick="addStudent()" class="bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg transition text-sm">
+            + Añadir Alumno
+        </button>
+    </nav>
+
+    <main class="p-6">
+        <div class="overflow-x-auto bg-white rounded-xl shadow-md">
+            <table class="min-w-full table-auto">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Alumno</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Nota 1</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Nota 2</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">Promedio</th>
+                    </tr>
+                </thead>
+                <tbody id="student-body">
+                    </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        // Datos iniciales
+        let students = [
+            { name: "Juan Pérez", n1: 8, n2: 9 },
+            { name: "María García", n1: 10, n2: 7 }
+        ];
+
+        function renderTable() {
+            const body = document.getElementById('student-body');
+            body.innerHTML = '';
+
+            students.forEach((student, index) => {
+                const average = ((student.n1 + student.n2) / 2).toFixed(1);
+                const row = `
+                    <tr class="border-b hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 font-medium text-gray-900">${student.name}</td>
+                        <td class="px-6 py-4">
+                            <input type="number" value="${student.n1}" onchange="updateNote(${index}, 'n1', this.value)" 
+                                class="w-16 border rounded px-2 py-1 focus:ring-2 focus:ring-blue-400 outline-none">
+                        </td>
+                        <td class="px-6 py-4">
+                            <input type="number" value="${student.n2}" onchange="updateNote(${index}, 'n2', this.value)" 
+                                class="w-16 border rounded px-2 py-1 focus:ring-2 focus:ring-blue-400 outline-none">
+                        </td>
+                        <td class="px-6 py-4 font-bold ${average >= 5 ? 'text-green-600' : 'text-red-600'}">
+                            ${average}
+                        </td>
+                    </tr>
+                `;
+                body.innerHTML += row;
+            });
+        }
+
+        function updateNote(index, field, value) {
+            students[index][field] = parseFloat(value) || 0;
+            renderTable();
+        }
+
+        function addStudent() {
+            const name = prompt("Nombre del nuevo alumno:");
+            if (name) {
+                students.push({ name: name, n1: 0, n2: 0 });
+                renderTable();
+            }
+        }
+
+        // Carga inicial
+        renderTable();
+    </script>
+</body>
+</html>
