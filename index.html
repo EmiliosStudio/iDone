@@ -1,63 +1,423 @@
-<script type="module">
-  // Importar las funciones que necesitamos de los SDKs de Firebase
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iDone - Réplica Exacta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&display=swap');
+        
+        /* Tipografía limpia sans-serif, idéntica a la de las imágenes */
+        body { font-family: 'Lato', sans-serif; background-color: #E0F7FA; color: #1A1A1A; }
 
-  // TODO: Sustituye esto con TUS DATOS de la consola de Firebase
-  const firebaseConfig = {
-    apiKey: "TU_API_KEY",
-    authDomain: "tu-proyecto.firebaseapp.com",
-    projectId: "tu-proyecto",
-    storageBucket: "tu-proyecto.appspot.com",
-    messagingSenderId: "123456789",
-    appId: "tu-app-id"
-  };
+        /* --- ESTILOS VISUALES EXACTOS --- */
+        .bg-main { background-color: #E0F7FA; } /* Fondo azul muy claro */
+        .bg-element { background-color: #A7DFFF; } /* Azul claro de botones/campos */
+        .shadow-custom { box-shadow: 0 4px 15px rgba(0,0,0,0.1); } /* Sombra suave */
 
-  // Inicializar Firebase
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+        /* Centrado absoluto para pantallas */
+        .screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            top: 0; left: 0;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
 
-  // --- Lógica de Registro ---
-  window.handleRegister = async (e) => {
-    e.preventDefault();
-    const email = document.querySelector('#register-screen input[type="email"]').value;
-    const password = document.querySelector('#register-screen input[type="password"]').value;
-    const nombre = document.querySelector('#register-screen input[type="text"]').value;
+        .hidden { display: none !important; }
 
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log("Usuario registrado:", userCredential.user);
-      // Aquí podrías guardar el nombre en el perfil del usuario si quisieras
-      alert("¡Cuenta creada con éxito!");
-    } catch (error) {
-      alert("Error al registrar: " + error.message);
-    }
-  };
+        /* --- ESTILOS DE FORMULARIO (Login/Registro) --- */
+        /* Estilo para los campos con etiquetas blancas superpuestas */
+        .input-group {
+            position: relative;
+            width: 100%;
+            margin-bottom: 2.5rem; /* Espacio exacto */
+        }
 
-  // --- Lógica de Inicio de Sesión ---
-  window.handleLogin = async (e) => {
-    e.preventDefault();
-    const email = document.querySelector('#login-screen input[type="email"]').value;
-    const password = document.querySelector('#login-screen input[type="password"]').value;
+        .input-label {
+            position: absolute;
+            top: -0.75rem; /* Ajuste para que flote justo encima */
+            left: 1.5rem;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background-color: transparent;
+            pointer-events: none;
+            letter-spacing: 0.05em;
+        }
 
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // El cambio de pantalla lo maneja el observador onAuthStateChanged
-    } catch (error) {
-      alert("Error al entrar: " + error.message);
-    }
-  };
+        .input-field {
+            width: 100%;
+            background-color: #A7DFFF;
+            color: white;
+            border-radius: 9999px; /* Bordes totalmente redondeados */
+            padding: 1rem 1.75rem;
+            outline: none;
+            border: 2px solid transparent; /* Base para el foco */
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
 
-  // --- Observador de Estado (Detecta si hay alguien logueado) ---
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      // El usuario está dentro
-      document.getElementById('user-display-name').innerText = user.email.split('@')[0]; // Usa el email como nombre temporal
-      showScreen('dashboard-screen');
-      renderDashboard();
-    } else {
-      // El usuario está fuera
-      showScreen('home-screen');
-    }
-  });
-</script>
+        .input-field::placeholder { color: transparent; }
+
+        /* Efecto de foco para los campos (borde púrpura exacto de la imagen 2) */
+        .input-field:focus {
+            border: 2px solid #8E44AD; /* Púrpura */
+        }
+
+        /* Botones Principales (Grandes de la Home) */
+        .main-btn {
+            background-color: #A7DFFF;
+            color: white;
+            border-radius: 9999px;
+            padding: 1.25rem 2.5rem;
+            font-weight: 700;
+            font-size: 1.25rem;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+        .main-btn:active { transform: scale(0.97); }
+
+        /* Botones de Envío (Pequeños abajo) */
+        .submit-btn {
+            background-color: #A7DFFF;
+            color: white;
+            border-radius: 9999px;
+            padding: 0.8rem 2.5rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Botón de volver atrás (Opcional, útil) */
+        .back-btn {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            color: #A7DFFF;
+            font-weight: 900;
+            cursor: pointer;
+            font-size: 1.2rem;
+            z-index: 100;
+        }
+
+        /* --- ESTILOS DEL DASHBOARD (Clases) --- */
+        /* Tarjeta de Clase */
+        .class-card {
+            background-color: #A7DFFF;
+            height: 130px; /* Altura exacta */
+            border-radius: 25px; /* Bordes muy redondeados */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .class-card:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+
+        /* Franja inferior blanca translúcida */
+        .class-footer {
+            position: absolute;
+            bottom: 12px;
+            width: 90%;
+            background: rgba(255,255,255,0.6); /* Transparencia exacta */
+            border-radius: 12px;
+            height: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 12px;
+            font-size: 0.7rem;
+            color: white;
+            font-weight: 300;
+        }
+
+        /* Botón Añadir "+" */
+        .add-btn {
+            background-color: #A7DFFF;
+            height: 130px;
+            border-radius: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 70px; /* Tamaño exacto del '+' */
+            color: white;
+            font-weight: 300;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Menú flotante (Dropdown) */
+        .dropdown-menu {
+            position: absolute;
+            top: 110%; /* Justo debajo de la tarjeta */
+            right: 0;
+            background: #A7DFFF; /* Mismo color */
+            border-radius: 20px; /* Bordes redondeados exactos */
+            padding: 10px;
+            z-index: 200;
+            width: 160px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            font-size: 0.8rem;
+            text-align: center;
+            color: white;
+            font-weight: 300;
+        }
+        /* Líneas divisorias */
+        .dropdown-menu div {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.4);
+        }
+        /* Último elemento (Eliminar) en rojo */
+        .dropdown-menu div:last-child {
+            border: none;
+            color: #FF5252; /* Rojo exacto */
+            font-weight: 700;
+        }
+
+        /* Iniciales círculo abajo izquierda */
+        .user-initials {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            width: 50px;
+            height: 50px;
+            background-color: white;
+            border-radius: 50%; /* Círculo perfecto */
+            display: flex;
+            items-center: center;
+            justify-content: center;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-size: 1.2rem;
+            color: #333;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 1px solid #EEE;
+            z-index: 50;
+        }
+
+        /* Título Bienvenido exacto */
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 400; /* Normal, no negrita */
+            margin-bottom: 3.5rem;
+            align-self: flex-start;
+            letter-spacing: -0.02em;
+        }
+    </style>
+</head>
+<body class="bg-main">
+
+    <div class="app-container">
+        
+        <div id="home-screen" class="screen">
+            <h1 class="text-7xl font-black mb-6 tracking-tighter">iDone</h1>
+            <p class="text-xl mb-16 font-light">Elige entre...</p>
+            <div class="flex gap-20"> <button onclick="showScreen('login-screen')" class="main-btn">Iniciar sesión</button>
+                <button onclick="showScreen('register-screen')" class="main-btn">Registrarse</button>
+            </div>
+        </div>
+
+        <div id="login-screen" class="screen hidden">
+            <span class="back-btn" onclick="showScreen('home-screen')">&larr;</span>
+            <h1 class="text-7xl font-black mb-20 tracking-tighter">Iniciar sesión</h1>
+            <div class="max-w-2xl w-full px-6">
+                <form onsubmit="simularEntrada(event)">
+                    <div class="input-group">
+                        <span class="input-label">Correo electrónico</span>
+                        <input type="email" class="input-field" placeholder=" ">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-label">Contraseña</span>
+                        <input type="password" class="input-field" placeholder=" ">
+                    </div>
+                    <button type="submit" class="submit-btn mt-10">Iniciar sesión</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="register-screen" class="screen hidden">
+            <span class="back-btn" onclick="showScreen('home-screen')">&larr;</span>
+            <h1 class="text-7xl font-black mb-20 tracking-tighter">Registrarse</h1>
+            <div class="max-w-3xl w-full px-6">
+                <form onsubmit="simularEntrada(event)">
+                    <div class="grid grid-cols-2 gap-x-12 mb-10"> <div class="input-group mb-0">
+                            <span class="input-label">Nombre</span>
+                            <input type="text" id="reg-nombre" class="input-field" placeholder=" ">
+                        </div>
+                        <div class="input-group mb-0">
+                            <span class="input-label">Apellidos</span>
+                            <input type="text" class="input-field" placeholder=" " autofocus>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-label">Correo electrónico</span>
+                        <input type="email" class="input-field" placeholder=" ">
+                    </div>
+                    <div class="input-group">
+                        <span class="input-label">Contraseña</span>
+                        <input type="password" class="input-field" placeholder=" ">
+                    </div>
+                    <button type="submit" class="submit-btn mt-10">Registrarse</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="dashboard-screen" class="screen hidden" style="justify-content: flex-start; align-items: flex-start; padding: 5rem;">
+            
+            <div id="user-initials" class="user-initials">
+                EJ
+            </div>
+
+            <h2 class="welcome-title">Bienvenido/a, <span id="user-display-name">{nombre}</span></h2>
+
+            <div id="classes-grid" class="grid grid-cols-3 gap-10 w-full max-w-6xl">
+                </div>
+
+            <div id="pagination-container" class="w-full max-w-6xl flex justify-center mt-16 gap-6 font-bold text-slate-700 text-lg">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // --- LÓGICA DE NAVEGACIÓN SIMPLE (Para asegurar diseño) ---
+
+        // Estado inicial simulado
+        let classes = [
+            { id: 'c1', name: "Clase 1", students: 22 }
+        ];
+        let currentPage = 1;
+        const itemsPerPage = 11; // Dejamos 1 hueco para el '+'
+
+        function showScreen(targetScreenId) {
+            // Ocultar todas las pantallas
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            // Mostrar la objetivo
+            document.getElementById(targetScreenId).classList.remove('hidden');
+        }
+
+        // Simulación de entrada para saltar al dashboard
+        function simularEntrada(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('reg-nombre').value || "Eduardo";
+            document.getElementById('user-display-name').innerText = nombre;
+            // Generar iniciales
+            document.getElementById('user-initials').innerText = nombre.substring(0,1) + "J"; // 'J' de ejemplo
+            showScreen('dashboard-screen');
+            renderDashboard();
+        }
+
+        // --- LÓGICA DEL DASHBOARD EXACTO ---
+
+        function renderDashboard() {
+            const grid = document.getElementById('classes-grid');
+            grid.innerHTML = '';
+
+            // Calcular paginación simulada
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageItems = classes.slice(start, end);
+
+            // Renderizar Clases existentes
+            pageItems.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'class-card';
+                card.innerHTML = `
+                    <span class="text-3xl font-normal">${item.name}</span>
+                    <div class="class-footer">
+                        <span>${item.students} alumnos</span>
+                        <span onclick="toggleMenu(event, '${item.id}')" class="font-black text-lg tracking-widest cursor-pointer">•••</span>
+                    </div>
+                    <div id="menu-${item.id}" class="dropdown-menu hidden shadow-custom">
+                        <div>Cambiar nombre</div>
+                        <div>Editar alumnos</div>
+                        <div>Reordenar</div>
+                        <div onclick="deleteClass('${item.id}')">Eliminar clase</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Botón "+" (Si hay espacio en la página actual o es la primera)
+            if (pageItems.length < itemsPerPage || classes.length === 0) {
+                const addBtn = document.createElement('div');
+                addBtn.className = 'add-btn';
+                addBtn.innerHTML = '+';
+                addBtn.onclick = addClass;
+                grid.appendChild(addBtn);
+            }
+
+            renderPagination();
+        }
+
+        // Funciones auxiliares simuladas
+        function addClass() {
+            const name = prompt("Nombre de la clase (simulado):");
+            if (name) {
+                classes.push({ id: 'c'+Date.now(), name: name, students: 0 });
+                renderDashboard();
+            }
+        }
+
+        function deleteClass(id) {
+            if (confirm("¿Eliminar esta clase (simulado)?")) {
+                classes = classes.filter(c => c.id !== id);
+                renderDashboard();
+            }
+        }
+
+        // Mostrar/Ocultar menú desplegable exacta
+        function toggleMenu(event, id) {
+            event.stopPropagation(); // Evitar que el clic abra la tarjeta
+            // Cerrar otros menús abiertos
+            document.querySelectorAll('.dropdown-menu').forEach(m => {
+                if(m.id !== `menu-${id}`) m.classList.add('hidden');
+            });
+            const menu = document.getElementById(`menu-${id}`);
+            menu.classList.toggle('hidden');
+        }
+
+        // Paginación simulada exacta
+        function renderPagination() {
+            const totalPages = Math.ceil(classes.length / itemsPerPage);
+            const pag = document.getElementById('pagination-container');
+            pag.innerHTML = '';
+            
+            if (totalPages > 1) {
+                pag.innerHTML += `<span class="cursor-pointer" onclick="changePage(${currentPage-1})"> < </span>`;
+                for (let i = 1; i <= totalPages; i++) {
+                    pag.innerHTML += `<span class="cursor-pointer ${i === currentPage ? 'text-blue-600 font-black' : ''}" onclick="changePage(${i})">${i}</span>`;
+                }
+                pag.innerHTML += `<span class="cursor-pointer" onclick="changePage(${currentPage+1})"> > </span>`;
+            }
+        }
+
+        function changePage(p) {
+            const totalPages = Math.ceil(classes.length / itemsPerPage);
+            if (p > 0 && p <= totalPages) {
+                currentPage = p;
+                renderDashboard();
+            }
+        }
+
+        // Asegurar que al pulsar fuera de un menú, este se cierre
+        window.addEventListener('click', () => {
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.add('hidden'));
+        });
+
+    </script>
+</body>
+</html>
