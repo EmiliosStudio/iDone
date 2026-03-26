@@ -1,178 +1,63 @@
-<div id="dashboard-screen" class="screen hidden" style="justify-content: flex-start; align-items: flex-start; padding: 4rem;">
-    <div class="fixed bottom-6 left-6 w-12 h-12 bg-white rounded-lg flex items-center justify-center font-bold text-slate-700 shadow-md border border-slate-200">
-        EJ
-    </div>
+<script type="module">
+  // Importar las funciones que necesitamos de los SDKs de Firebase
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-    <h2 class="text-4xl font-normal mb-12 self-start">Bienvenido/a, <span id="user-display-name">{nombre}</span></h2>
+  // TODO: Sustituye esto con TUS DATOS de la consola de Firebase
+  const firebaseConfig = {
+    apiKey: "TU_API_KEY",
+    authDomain: "tu-proyecto.firebaseapp.com",
+    projectId: "tu-proyecto",
+    storageBucket: "tu-proyecto.appspot.com",
+    messagingSenderId: "123456789",
+    appId: "tu-app-id"
+  };
 
-    <div id="classes-grid" class="grid grid-cols-3 gap-8 w-full max-w-5xl">
-        </div>
+  // Inicializar Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
 
-    <div id="pagination-container" class="w-full max-w-5xl flex justify-center mt-12 gap-4 font-bold text-slate-600">
-        </div>
-</div>
+  // --- Lógica de Registro ---
+  window.handleRegister = async (e) => {
+    e.preventDefault();
+    const email = document.querySelector('#register-screen input[type="email"]').value;
+    const password = document.querySelector('#register-screen input[type="password"]').value;
+    const nombre = document.querySelector('#register-screen input[type="text"]').value;
 
-<style>
-    /* Estilos para las tarjetas de clase */
-    .class-card {
-        background-color: #A7DFFF;
-        height: 120px;
-        border-radius: 20px;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        color: white;
-        cursor: pointer;
-        transition: transform 0.2s;
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      console.log("Usuario registrado:", userCredential.user);
+      // Aquí podrías guardar el nombre en el perfil del usuario si quisieras
+      alert("¡Cuenta creada con éxito!");
+    } catch (error) {
+      alert("Error al registrar: " + error.message);
     }
-    .class-card:hover { transform: scale(1.02); }
+  };
 
-    .class-footer {
-        position: absolute;
-        bottom: 10px;
-        width: 90%;
-        background: rgba(255,255,255,0.5);
-        border-radius: 10px;
-        height: 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0 10px;
-        font-size: 10px;
-        color: white;
+  // --- Lógica de Inicio de Sesión ---
+  window.handleLogin = async (e) => {
+    e.preventDefault();
+    const email = document.querySelector('#login-screen input[type="email"]').value;
+    const password = document.querySelector('#login-screen input[type="password"]').value;
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      // El cambio de pantalla lo maneja el observador onAuthStateChanged
+    } catch (error) {
+      alert("Error al entrar: " + error.message);
     }
+  };
 
-    /* Menú flotante (Dropdown) */
-    .dropdown-menu {
-        position: absolute;
-        top: 110%;
-        right: 0;
-        background: #A7DFFF;
-        border-radius: 15px;
-        padding: 10px;
-        z-index: 100;
-        width: 150px;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        font-size: 12px;
-        text-align: center;
+  // --- Observador de Estado (Detecta si hay alguien logueado) ---
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      // El usuario está dentro
+      document.getElementById('user-display-name').innerText = user.email.split('@')[0]; // Usa el email como nombre temporal
+      showScreen('dashboard-screen');
+      renderDashboard();
+    } else {
+      // El usuario está fuera
+      showScreen('home-screen');
     }
-    .dropdown-menu div { padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.3); }
-    .dropdown-menu div:last-child { border: none; color: #ff5e5e; font-weight: bold; }
-
-    .add-btn {
-        background-color: #A7DFFF;
-        height: 120px;
-        border-radius: 20px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 60px;
-        color: white;
-        cursor: pointer;
-    }
-</style>
-
-<script>
-    // Estado de la aplicación
-    let classes = [
-        { id: 1, name: "Clase 1", students: 22 }
-    ];
-    let currentPage = 1;
-    const itemsPerPage = 11; // 11 clases + 1 botón de añadir = 12 espacios
-
-    function renderDashboard() {
-        const grid = document.getElementById('classes-grid');
-        const pag = document.getElementById('pagination-container');
-        grid.innerHTML = '';
-
-        // Calcular paginación
-        const start = (currentPage - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
-        const pageItems = classes.slice(start, end);
-
-        // Renderizar Clases
-        pageItems.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'class-card';
-            card.innerHTML = `
-                <span class="text-2xl">${item.name}</span>
-                <div class="class-footer">
-                    <span>${item.students} alumnos</span>
-                    <span onclick="toggleMenu(event, ${item.id})">•••</span>
-                </div>
-                <div id="menu-${item.id}" class="dropdown-menu hidden">
-                    <div>Cambiar nombre</div>
-                    <div>Editar alumnos</div>
-                    <div>Reordenar</div>
-                    <div onclick="deleteClass(${item.id})">Eliminar clase</div>
-                </div>
-            `;
-            grid.appendChild(card);
-        });
-
-        // Botón "+" (Si hay espacio en la página actual)
-        if (pageItems.length < itemsPerPage || classes.length === itemsPerPage) {
-            const addBtn = document.createElement('div');
-            addBtn.className = 'add-btn';
-            addBtn.innerHTML = '+';
-            addBtn.onclick = addClass;
-            grid.appendChild(addBtn);
-        }
-
-        renderPagination();
-    }
-
-    function addClass() {
-        const name = prompt("Nombre de la clase:");
-        if (name) {
-            classes.push({ id: Date.now(), name: name, students: 0 });
-            renderDashboard();
-        }
-    }
-
-    function deleteClass(id) {
-        classes = classes.filter(c => c.id !== id);
-        renderDashboard();
-    }
-
-    function toggleMenu(event, id) {
-        event.stopPropagation();
-        const menu = document.getElementById(`menu-${id}`);
-        menu.classList.toggle('hidden');
-    }
-
-    function renderPagination() {
-        const totalPages = Math.ceil(classes.length / itemsPerPage);
-        const pag = document.getElementById('pagination-container');
-        pag.innerHTML = '';
-        
-        if (totalPages > 1) {
-            pag.innerHTML += `<span class="cursor-pointer" onclick="changePage(${currentPage-1})"> < </span>`;
-            for (let i = 1; i <= totalPages; i++) {
-                pag.innerHTML += `<span class="cursor-pointer ${i === currentPage ? 'text-blue-500' : ''}" onclick="changePage(${i})">${i}</span>`;
-            }
-            pag.innerHTML += `<span class="cursor-pointer" onclick="changePage(${currentPage+1})"> > </span>`;
-        }
-    }
-
-    function changePage(p) {
-        const totalPages = Math.ceil(classes.length / itemsPerPage);
-        if (p > 0 && p <= totalPages) {
-            currentPage = p;
-            renderDashboard();
-        }
-    }
-
-    // SIMULACIÓN DE LOGIN: Al hacer clic en el botón de login, saltamos al dashboard
-    document.querySelectorAll('form').forEach(form => {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const nameInput = document.querySelector('#register-screen input[type="text"]')?.value || "Usuario";
-            document.getElementById('user-display-name').innerText = nameInput;
-            showScreen('dashboard-screen');
-            renderDashboard();
-        });
-    });
+  });
 </script>
