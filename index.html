@@ -1,199 +1,178 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iDone - Copia Exacta</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap');
-        
-        /* Tipografía limpia sans-serif, similar a la de las imágenes */
-        body { font-family: 'Lato', sans-serif; }
-
-        /* Colores exactos de tu diseño */
-        .bg-custom-light-blue { background-color: #E0F7FA; } /* Fondo azul muy claro */
-        .bg-custom-element-blue { background-color: #A7DFFF; } /* Color de botones y campos */
-        
-        /* Centrado absoluto para todas las pantallas */
-        .screen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
-        }
-
-        .hidden { display: none; }
-
-        /* Estilo específico para los campos con etiquetas blancas de marcador de posición sobre ellos */
-        .input-group {
-            position: relative;
-            width: 100%;
-            margin-bottom: 2rem;
-        }
-
-        .input-label {
-            position: absolute;
-            top: -0.75rem;
-            left: 1.5rem;
-            color: white;
-            font-size: 0.75rem;
-            font-weight: bold;
-            background-color: transparent;
-            pointer-events: none;
-        }
-
-        .input-field {
-            width: 100%;
-            background-color: #A7DFFF;
-            color: white;
-            border-radius: 9999px; /* Bordes muy redondeados */
-            padding: 1rem 1.5rem;
-            outline: none;
-            transition: border-color 0.2s ease-in-out;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        .input-field::placeholder { color: transparent; } /* Oculta el marcador de posición real */
-
-        /* Efecto de foco para los campos */
-        .input-field:focus {
-            border: 2px solid purple; /* Borde púrpura al enfocar, replicando la imagen 2 */
-        }
-
-        /* Estilo para los botones principales */
-        .main-btn {
-            background-color: #A7DFFF;
-            color: white;
-            border-radius: 9999px;
-            padding: 1rem 2rem;
-            font-weight: bold;
-            font-size: 1.125rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-
-        /* Estilo para los botones de envío más pequeños */
-        .submit-btn {
-            background-color: #A7DFFF;
-            color: white;
-            border-radius: 9999px;
-            padding: 0.75rem 2rem;
-            font-weight: bold;
-            font-size: 0.875rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Botón de volver atrás */
-        .back-btn {
-            position: fixed;
-            top: 1rem;
-            left: 1rem;
-            color: #A7DFFF;
-            font-weight: bold;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body class="bg-custom-light-blue text-slate-900">
-
-    <div class="app-container">
-        <div id="home-screen" class="screen">
-            <h1 class="text-6xl font-black mb-4">iDone</h1>
-            <p class="text-lg mb-12">Elige entre...</p>
-            <div class="flex gap-16">
-                <button id="btn-show-login" class="main-btn">Iniciar sesión</button>
-                <button id="btn-show-register" class="main-btn">Registrarse</button>
-            </div>
-        </div>
-
-        <div id="login-screen" class="screen hidden">
-            <span class="back-btn" onclick="showScreen('home-screen')">&larr; Atrás</span>
-            <h1 class="text-6xl font-black mb-16">Iniciar sesión</h1>
-            <div class="max-w-xl w-full px-4">
-                <form>
-                    <div class="input-group">
-                        <span class="input-label">Correo electrónico</span>
-                        <input type="email" class="input-field" placeholder=" ">
-                    </div>
-                    <div class="input-group">
-                        <span class="input-label">Contraseña</span>
-                        <input type="password" class="input-field" placeholder=" ">
-                    </div>
-                    <button type="submit" class="submit-btn mt-8">Iniciar sesión</button>
-                </form>
-            </div>
-        </div>
-
-        <div id="register-screen" class="screen hidden">
-            <span class="back-btn" onclick="showScreen('home-screen')">&larr; Atrás</span>
-            <h1 class="text-6xl font-black mb-16">Registrarse</h1>
-            <div class="max-w-2xl w-full px-4">
-                <form>
-                    <div class="grid grid-cols-2 gap-x-8 gap-y-12">
-                        <div class="input-group">
-                            <span class="input-label">Nombre</span>
-                            <input type="text" class="input-field" placeholder=" ">
-                        </div>
-                        <div class="input-group">
-                            <span class="input-label">Apellidos</span>
-                            <input type="text" class="input-field" placeholder=" ">
-                        </div>
-                    </div>
-                    <div class="input-group mt-12">
-                        <span class="input-label">Correo electrónico</span>
-                        <input type="email" class="input-field" placeholder=" ">
-                    </div>
-                    <div class="input-group">
-                        <span class="input-label">Contraseña</span>
-                        <input type="password" class="input-field" placeholder=" ">
-                    </div>
-                    <button type="submit" class="submit-btn mt-8">Registrarse</button>
-                </form>
-            </div>
-        </div>
+<div id="dashboard-screen" class="screen hidden" style="justify-content: flex-start; align-items: flex-start; padding: 4rem;">
+    <div class="fixed bottom-6 left-6 w-12 h-12 bg-white rounded-lg flex items-center justify-center font-bold text-slate-700 shadow-md border border-slate-200">
+        EJ
     </div>
 
-    <script>
-        // Elementos de pantalla
-        const homeScreen = document.getElementById('home-screen');
-        const loginScreen = document.getElementById('login-screen');
-        const registerScreen = document.getElementById('register-screen');
+    <h2 class="text-4xl font-normal mb-12 self-start">Bienvenido/a, <span id="user-display-name">{nombre}</span></h2>
 
-        // Botones de navegación
-        const btnShowLogin = document.getElementById('btn-show-login');
-        const btnShowRegister = document.getElementById('btn-show-register');
+    <div id="classes-grid" class="grid grid-cols-3 gap-8 w-full max-w-5xl">
+        </div>
 
-        // Función central para cambiar de pantalla
-        function showScreen(targetScreenId) {
-            // Ocultar todas las pantallas
-            homeScreen.classList.add('hidden');
-            loginScreen.classList.add('hidden');
-            registerScreen.classList.add('hidden');
+    <div id="pagination-container" class="w-full max-w-5xl flex justify-center mt-12 gap-4 font-bold text-slate-600">
+        </div>
+</div>
 
-            // Mostrar la pantalla objetivo
-            const targetScreen = document.getElementById(targetScreenId);
-            targetScreen.classList.remove('hidden');
+<style>
+    /* Estilos para las tarjetas de clase */
+    .class-card {
+        background-color: #A7DFFF;
+        height: 120px;
+        border-radius: 20px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .class-card:hover { transform: scale(1.02); }
+
+    .class-footer {
+        position: absolute;
+        bottom: 10px;
+        width: 90%;
+        background: rgba(255,255,255,0.5);
+        border-radius: 10px;
+        height: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 10px;
+        font-size: 10px;
+        color: white;
+    }
+
+    /* Menú flotante (Dropdown) */
+    .dropdown-menu {
+        position: absolute;
+        top: 110%;
+        right: 0;
+        background: #A7DFFF;
+        border-radius: 15px;
+        padding: 10px;
+        z-index: 100;
+        width: 150px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        font-size: 12px;
+        text-align: center;
+    }
+    .dropdown-menu div { padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.3); }
+    .dropdown-menu div:last-child { border: none; color: #ff5e5e; font-weight: bold; }
+
+    .add-btn {
+        background-color: #A7DFFF;
+        height: 120px;
+        border-radius: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 60px;
+        color: white;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    // Estado de la aplicación
+    let classes = [
+        { id: 1, name: "Clase 1", students: 22 }
+    ];
+    let currentPage = 1;
+    const itemsPerPage = 11; // 11 clases + 1 botón de añadir = 12 espacios
+
+    function renderDashboard() {
+        const grid = document.getElementById('classes-grid');
+        const pag = document.getElementById('pagination-container');
+        grid.innerHTML = '';
+
+        // Calcular paginación
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
+        const pageItems = classes.slice(start, end);
+
+        // Renderizar Clases
+        pageItems.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'class-card';
+            card.innerHTML = `
+                <span class="text-2xl">${item.name}</span>
+                <div class="class-footer">
+                    <span>${item.students} alumnos</span>
+                    <span onclick="toggleMenu(event, ${item.id})">•••</span>
+                </div>
+                <div id="menu-${item.id}" class="dropdown-menu hidden">
+                    <div>Cambiar nombre</div>
+                    <div>Editar alumnos</div>
+                    <div>Reordenar</div>
+                    <div onclick="deleteClass(${item.id})">Eliminar clase</div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        // Botón "+" (Si hay espacio en la página actual)
+        if (pageItems.length < itemsPerPage || classes.length === itemsPerPage) {
+            const addBtn = document.createElement('div');
+            addBtn.className = 'add-btn';
+            addBtn.innerHTML = '+';
+            addBtn.onclick = addClass;
+            grid.appendChild(addBtn);
         }
 
-        // Event Listeners para los botones de la pantalla de inicio
-        btnShowLogin.addEventListener('click', () => {
-            showScreen('login-screen');
-        });
+        renderPagination();
+    }
 
-        btnShowRegister.addEventListener('click', () => {
-            showScreen('register-screen');
-        });
+    function addClass() {
+        const name = prompt("Nombre de la clase:");
+        if (name) {
+            classes.push({ id: Date.now(), name: name, students: 0 });
+            renderDashboard();
+        }
+    }
 
-        // (Opcional) Puedes añadir lógica para manejar los formularios aquí más adelante.
-        // Por ahora, solo simulan el envío sin recargar la página.
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', (e) => {
-                e.preventDefault();
-                alert('¡Formulario enviado! (Aquí iría la lógica de autenticación)');
-            });
+    function deleteClass(id) {
+        classes = classes.filter(c => c.id !== id);
+        renderDashboard();
+    }
+
+    function toggleMenu(event, id) {
+        event.stopPropagation();
+        const menu = document.getElementById(`menu-${id}`);
+        menu.classList.toggle('hidden');
+    }
+
+    function renderPagination() {
+        const totalPages = Math.ceil(classes.length / itemsPerPage);
+        const pag = document.getElementById('pagination-container');
+        pag.innerHTML = '';
+        
+        if (totalPages > 1) {
+            pag.innerHTML += `<span class="cursor-pointer" onclick="changePage(${currentPage-1})"> < </span>`;
+            for (let i = 1; i <= totalPages; i++) {
+                pag.innerHTML += `<span class="cursor-pointer ${i === currentPage ? 'text-blue-500' : ''}" onclick="changePage(${i})">${i}</span>`;
+            }
+            pag.innerHTML += `<span class="cursor-pointer" onclick="changePage(${currentPage+1})"> > </span>`;
+        }
+    }
+
+    function changePage(p) {
+        const totalPages = Math.ceil(classes.length / itemsPerPage);
+        if (p > 0 && p <= totalPages) {
+            currentPage = p;
+            renderDashboard();
+        }
+    }
+
+    // SIMULACIÓN DE LOGIN: Al hacer clic en el botón de login, saltamos al dashboard
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nameInput = document.querySelector('#register-screen input[type="text"]')?.value || "Usuario";
+            document.getElementById('user-display-name').innerText = nameInput;
+            showScreen('dashboard-screen');
+            renderDashboard();
         });
-    </script>
-</body>
-</html>
+    });
+</script>
